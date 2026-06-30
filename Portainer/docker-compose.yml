@@ -9,7 +9,7 @@ services:
     networks:
       - proxy
     ports:
-      - 9443:9443
+      - 9000:9000
 volumes:
   portainer_data:
 

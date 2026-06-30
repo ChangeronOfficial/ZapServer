@@ -20,16 +20,10 @@ server:80 {
 		uri strip_prefix /registry-ui
 		reverse_proxy registry-ui:80
 	}
-}
 
-server:443 {
 	redir /portainer /portainer/
 
 	handle /portainer* {
-		reverse_proxy portainer:9443 {
-			transport http {
-				tls_insecure_skip_verify
-			}
-		}
+		reverse_proxy portainer:9000
 	}
 }
