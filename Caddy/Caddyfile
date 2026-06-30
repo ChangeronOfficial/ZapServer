@@ -23,7 +23,7 @@ auth.zapcode.ch {
 
 	redir /portainer /portainer/
 
-	handle /portainer* {
+	handle_path /portainer/* {
 		reverse_proxy portainer:9443 {
 			transport http {
 				tls_insecure_skip_verify
