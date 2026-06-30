@@ -3,6 +3,8 @@ services:
     image: registry:2
     container_name: docker-registry
     restart: unless-stopped
+    ports:
+      - "5000:5000"
     environment:
       REGISTRY_HTTP_PREFIX: /registry/
       REGISTRY_HTTP_RELATIVEURLS: "true"
@@ -16,6 +18,8 @@ services:
     image: joxit/docker-registry-ui:latest
     container_name: docker-registry-ui
     restart: unless-stopped
+    ports:
+      - "8080:80"
     environment:
       SINGLE_REGISTRY: "true"
       REGISTRY_TITLE: ZapServer Registry

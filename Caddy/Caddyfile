@@ -5,27 +5,3 @@ zapcode.ch, www.zapcode.ch {
 auth.zapcode.ch {
 	reverse_proxy keycloak:8080
 }
-
-server {
-	tls internal
-
-	handle /registry* {
-		uri strip_prefix /registry
-		reverse_proxy registry:5000 {
-			header_up Host {host}
-			header_up X-Forwarded-Proto {scheme}
-			header_up X-Forwarded-For {remote_host}
-		}
-	}
-
-	handle /registry-ui* {
-		uri strip_prefix /registry-ui
-		reverse_proxy registry-ui:80
-	}
-
-	redir /portainer /portainer/
-
-	handle /portainer* {
-		reverse_proxy portainer:9000
-	}
-}
