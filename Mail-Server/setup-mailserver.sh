@@ -15,7 +15,7 @@ IMAGE="ghcr.io/docker-mailserver/docker-mailserver:latest"
 
 DEFAULT_DOMAIN="zapcode.ch"
 DEFAULT_HOSTNAME="mail.zapcode.ch"
-DEFAULT_POSTMASTER="postmaster@zapcode.ch"
+DEFAULT_POSTMASTER="admin@zapcode.ch"
 DEFAULT_MAILBOX="noreply@zapcode.ch"
 DEFAULT_KEYCLOAK_REALM="zapfood"
 DEFAULT_KEYCLOAK_ADMIN_USERNAME="admin"
