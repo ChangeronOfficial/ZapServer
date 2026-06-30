@@ -22,7 +22,7 @@ server:80 {
 	}
 }
 
-server:443{
+server:443 {
 	redir /portainer /portainer/
 
 	handle_path /portainer/* {
