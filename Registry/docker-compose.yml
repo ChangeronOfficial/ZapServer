@@ -4,6 +4,8 @@ services:
     container_name: docker-registry
     restart: unless-stopped
     environment:
+      REGISTRY_HTTP_PREFIX: /registry/
+      REGISTRY_HTTP_RELATIVEURLS: "true"
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
     volumes:
       - registry_data:/var/lib/registry
@@ -17,7 +19,7 @@ services:
     environment:
       SINGLE_REGISTRY: "true"
       REGISTRY_TITLE: ZapServer Registry
-      REGISTRY_URL: http://registry:5000
+      REGISTRY_URL: /registry
       DELETE_IMAGES: "true"
       SHOW_CONTENT_DIGEST: "true"
     depends_on:
