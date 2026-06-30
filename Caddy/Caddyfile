@@ -6,7 +6,7 @@ auth.zapcode.ch {
 	reverse_proxy keycloak:8080
 }
 
-server:80 {
+:80 {
 	handle /registry* {
 		uri strip_prefix /registry
 		reverse_proxy registry:5000 {
@@ -21,8 +21,9 @@ server:80 {
 		reverse_proxy registry-ui:80
 	}
 
+	redir /portainer /portainer/
+
 	handle /portainer* {
-		uri strip_prefix /portainer
 		reverse_proxy portainer:9443 {
 			transport http {
 				tls_insecure_skip_verify
