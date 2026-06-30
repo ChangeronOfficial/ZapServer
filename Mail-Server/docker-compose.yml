@@ -28,8 +28,12 @@ services:
       retries: 3
     stop_grace_period: 1m
     networks:
-      - default
-      - proxy
+      default:
+      proxy:
+        aliases:
+          - mailserver
+          - mail
+          - mail.zapcode.ch
 
 volumes:
   mail_data:

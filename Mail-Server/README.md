@@ -9,6 +9,7 @@ Set the following values in [`.env`](/workspaces/ZapServer/Mail-Server/.env:1):
 - `MAIL_ACCOUNT`: mailbox that applications should use for SMTP, default `no-reply@zapcode.ch`
 - `MAIL_ACCOUNT_PASSWORD`: mailbox password used by SMTP clients
 - `OVERRIDE_HOSTNAME`: public hostname of the mailserver, default `mail.zapcode.ch`
+- `LETSENCRYPT_DOMAIN`: certificate hostname used when `SSL_TYPE=letsencrypt`, usually the same as `OVERRIDE_HOSTNAME`
 
 Then start the mailserver and create or update the mailbox:
 
@@ -23,3 +24,10 @@ The script is idempotent:
 - if the mailbox already exists, its password is updated
 
 Use the same mailbox and password in [ZapAuth](../ZapAuth/README.md) as `KC_SMTP_USER` and `KC_SMTP_PASSWORD`.
+
+## Networking
+
+The mailserver publishes the aliases `mailserver`, `mail`, and `mail.zapcode.ch` on the shared
+Docker network `zapserver_proxy`.
+
+This allows other stacks such as `ZapAuth` to reach SMTP internally via `mailserver:587`.
