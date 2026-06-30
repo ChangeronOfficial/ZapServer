@@ -5,11 +5,8 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
-    environment:
-      REGISTRY_HTTP_PREFIX: /registry/
-      REGISTRY_HTTP_RELATIVEURLS: "true"
-      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
     volumes:
+      - ./config.yml:/etc/docker/registry/config.yml:ro
       - registry_data:/var/lib/registry
     networks:
       - proxy
