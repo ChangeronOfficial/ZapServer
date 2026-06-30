@@ -6,7 +6,9 @@ auth.zapcode.ch {
 	reverse_proxy keycloak:8080
 }
 
-server:80 {
+server {
+	tls internal
+
 	handle /registry* {
 		uri strip_prefix /registry
 		reverse_proxy registry:5000 {
