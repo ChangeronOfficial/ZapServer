@@ -19,6 +19,8 @@ services:
     image: ${KEYCLOAK_IMAGE:-server:5000/zapauth-keycloak:latest}
     container_name: zapauth-keycloak
     restart: unless-stopped
+    env_file:
+      - .env
     command:
       - start
       - --optimized
@@ -28,12 +30,22 @@ services:
       KC_DB_USERNAME: ${POSTGRES_USER:-keycloak}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-replace-me}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-change-me}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-replace-me}
       KC_HOSTNAME: ${KC_HOSTNAME:-auth.zapcode.ch}
       KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-xforwarded}
       KC_HTTP_ENABLED: ${KC_HTTP_ENABLED:-true}
       KC_HEALTH_ENABLED: ${KC_HEALTH_ENABLED:-true}
       KC_METRICS_ENABLED: ${KC_METRICS_ENABLED:-true}
+      KC_SMTP_HOST: ${KC_SMTP_HOST:-mail.zapcode.ch}
+      KC_SMTP_PORT: ${KC_SMTP_PORT:-587}
+      KC_SMTP_FROM: ${KC_SMTP_FROM:-no-reply@zapcode.ch}
+      KC_SMTP_FROM_DISPLAY_NAME: ${KC_SMTP_FROM_DISPLAY_NAME:-ZapAuth}
+      KC_SMTP_REPLY_TO: ${KC_SMTP_REPLY_TO:-no-reply@zapcode.ch}
+      KC_SMTP_AUTH: ${KC_SMTP_AUTH:-true}
+      KC_SMTP_STARTTLS: ${KC_SMTP_STARTTLS:-true}
+      KC_SMTP_SSL: ${KC_SMTP_SSL:-false}
+      KC_SMTP_USER: ${KC_SMTP_USER:-no-reply@zapcode.ch}
+      KC_SMTP_PASSWORD: ${KC_SMTP_PASSWORD:-replace-me}
     depends_on:
       keyclock-db:
         condition: service_healthy
@@ -43,6 +55,22 @@ services:
     ports:
       - 9000:9000
       - 9001:8080
+
+  configure-realm-email:
+    image: ${KEYCLOAK_IMAGE:-server:5000/zapauth-keycloak:latest}
+    restart: "no"
+    env_file:
+      - .env
+    entrypoint:
+      - /bin/sh
+      - /opt/keycloak/setup/configure-realm-email.sh
+    depends_on:
+      keycloak:
+        condition: service_started
+    volumes:
+      - ./setup:/opt/keycloak/setup:ro
+    networks:
+      - default
 
 volumes:
   postgres_data:
