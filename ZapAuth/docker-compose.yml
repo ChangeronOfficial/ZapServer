@@ -40,6 +40,8 @@ services:
     networks:
       - default
       - proxy
+    ports:
+      9000:9000
 
 volumes:
   postgres_data:
