@@ -1,6 +1,7 @@
 services:
   portainer:
     image: portainer/portainer-ce:latest
+    command: --base-url /portainer
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

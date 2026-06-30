@@ -25,7 +25,7 @@ server:80 {
 server:443 {
 	redir /portainer /portainer/
 
-	handle_path /portainer/* {
+	handle /portainer* {
 		reverse_proxy portainer:9443 {
 			transport http {
 				tls_insecure_skip_verify
