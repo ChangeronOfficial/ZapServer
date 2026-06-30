@@ -23,7 +23,7 @@ services:
     environment:
       SINGLE_REGISTRY: "true"
       REGISTRY_TITLE: ZapServer Registry
-      REGISTRY_URL: /registry
+      REGISTRY_URL: http://server:5000
       DELETE_IMAGES: "true"
       SHOW_CONTENT_DIGEST: "true"
     depends_on:
