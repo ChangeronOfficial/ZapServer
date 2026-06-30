@@ -1,6 +1,7 @@
 services:
   keyclock-db:
     image: ${POSTGRES_IMAGE:-postgres:16}
+    container_name: zapauth-db
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-keycloak}
@@ -16,6 +17,7 @@ services:
 
   keycloak:
     image: ${KEYCLOAK_IMAGE:-server:5000/zapauth-keycloak:latest}
+    container_name: zapauth-keycloak
     restart: unless-stopped
     command:
       - start

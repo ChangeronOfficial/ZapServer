@@ -3,5 +3,5 @@ zapcode.ch, www.zapcode.ch {
 }
 
 auth.zapcode.ch {
-	reverse_proxy keycloak:8080
+	reverse_proxy zapauth-keycloak:8080
 }
