@@ -1,0 +1,48 @@
+services:
+  keyclock-db:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-keycloak}
+      POSTGRES_USER: ${POSTGRES_USER:-keycloak}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-replace-me}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  keycloak:
+    image: ${KEYCLOAK_IMAGE:-registry.server/zapauth-keycloak:latest}
+    restart: unless-stopped
+    command:
+      - start
+      - --optimized
+    environment:
+      KC_DB: ${KC_DB:-postgres}
+      KC_DB_URL: jdbc:postgresql://keyclock-db:5432/${POSTGRES_DB:-keycloak}
+      KC_DB_USERNAME: ${POSTGRES_USER:-keycloak}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-replace-me}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-change-me}
+      KC_HOSTNAME: ${KC_HOSTNAME:-auth.zapcode.ch}
+      KC_PROXY_HEADERS: ${KC_PROXY_HEADERS:-xforwarded}
+      KC_HTTP_ENABLED: ${KC_HTTP_ENABLED:-true}
+      KC_HEALTH_ENABLED: ${KC_HEALTH_ENABLED:-true}
+      KC_METRICS_ENABLED: ${KC_METRICS_ENABLED:-true}
+    depends_on:
+      keyclock-db:
+        condition: service_healthy
+    networks:
+      - default
+      - proxy
+
+volumes:
+  postgres_data:
+
+networks:
+  proxy:
+    name: zapserver_proxy
+    external: true

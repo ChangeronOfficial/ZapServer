@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: zapfood-db
+    environment:
+      POSTGRES_DB: ${ZAPFOOD_DB_NAME:-zapfood}
+      POSTGRES_USER: ${ZAPFOOD_DB_USER:-zapfood}
+      POSTGRES_PASSWORD: ${ZAPFOOD_DB_PASSWORD:-change-me}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  prisma-setup:
+    image: registry.server/zapfood-prisma:latest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${ZAPFOOD_DB_USER:-zapfood}:${ZAPFOOD_DB_PASSWORD:-change-me}@db:5432/${ZAPFOOD_DB_NAME:-zapfood}?schema=public
+    command: ["npx", "prisma", "db", "push"]
+    restart: "no"
+
+  app:
+    image: registry.server/zapfood:latest
+    container_name: zapfood-app
+    depends_on:
+      db:
+        condition: service_healthy
+      prisma-setup:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://${ZAPFOOD_DB_USER:-zapfood}:${ZAPFOOD_DB_PASSWORD:-change-me}@db:5432/${ZAPFOOD_DB_NAME:-zapfood}?schema=public
+      APP_BASE_URL: ${APP_BASE_URL:-https://zapcode.ch}
+      AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-replace-me}
+      HOST: 0.0.0.0
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-zapfood-web}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      OIDC_INTERNAL_ISSUER: ${OIDC_INTERNAL_ISSUER:-http://keycloak:8080/realms/zapfood}
+      OIDC_ISSUER: ${OIDC_ISSUER:-https://auth.zapcode.ch/realms/zapfood}
+      OIDC_REGISTRATION_URL: ${OIDC_REGISTRATION_URL:-}
+      PORT: 3000
+      NODE_ENV: production
+    networks:
+      - default
+      - proxy
+
+volumes:
+  postgres-data:
+
+networks:
+  proxy:
+    name: zapserver_proxy
+    external: true

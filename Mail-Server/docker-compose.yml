@@ -1,0 +1,42 @@
+services:
+  mailserver:
+    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    container_name: mailserver
+    hostname: mail
+    domainname: zapcode.ch
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "25:25"
+      - "143:143"
+      - "465:465"
+      - "587:587"
+      - "993:993"
+    volumes:
+      - mail_data:/var/mail
+      - mail_state:/var/mail-state
+      - mail_logs:/var/log/mail
+      - ./docker-data/dms/config/:/tmp/docker-mailserver/
+      - /etc/localtime:/etc/localtime:ro
+    cap_add:
+      - NET_ADMIN
+      - SYS_PTRACE
+    healthcheck:
+      test: ["CMD", "ss", "-lnt"]
+      timeout: 5s
+      retries: 3
+    stop_grace_period: 1m
+    networks:
+      - default
+      - proxy
+
+volumes:
+  mail_data:
+  mail_state:
+  mail_logs:
+
+networks:
+  proxy:
+    name: zapserver_proxy
+    external: true

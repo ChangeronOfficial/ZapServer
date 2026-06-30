@@ -1,0 +1,27 @@
+server, zapcode.ch, www.zapcode.ch {
+	reverse_proxy zapfood-app:3000
+}
+
+auth.zapcode.ch {
+	reverse_proxy keycloak:8080
+}
+
+registry.server {
+	reverse_proxy registry:5000 {
+		header_up Host {host}
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-For {remote_host}
+	}
+}
+
+registry-ui.server {
+	reverse_proxy registry-ui:80
+}
+
+portainer.server {
+	reverse_proxy portainer:9443 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
