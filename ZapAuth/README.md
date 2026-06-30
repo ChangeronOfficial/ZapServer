@@ -9,6 +9,7 @@ verification emails, and admin notifications are sent through the SMTP server at
 Set the following values in [`.env`](/workspaces/ZapServer/ZapAuth/.env:1):
 
 - `KEYCLOAK_REALM`: realm whose email settings should be updated, default `zapfood`
+- `KEYCLOAK_CREATE_REALM_IF_MISSING`: create the realm automatically if it does not exist, default `true`
 - `KC_SMTP_HOST`: SMTP host, default `mail.zapcode.ch`
 - `KC_SMTP_PORT`: SMTP port, default `587`
 - `KC_SMTP_FROM`: envelope/header sender, default `no-reply@zapcode.ch`

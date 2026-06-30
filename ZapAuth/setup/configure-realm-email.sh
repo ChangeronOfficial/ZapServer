@@ -4,6 +4,7 @@ set -eu
 
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://keycloak:8080}"
 KEYCLOAK_REALM="${KEYCLOAK_REALM:-zapfood}"
+KEYCLOAK_CREATE_REALM_IF_MISSING="${KEYCLOAK_CREATE_REALM_IF_MISSING:-true}"
 BOOTSTRAP_ADMIN_USERNAME="${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}"
 BOOTSTRAP_ADMIN_PASSWORD="${KC_BOOTSTRAP_ADMIN_PASSWORD:-replace-me}"
 
@@ -21,6 +22,18 @@ until /opt/keycloak/bin/kcadm.sh config credentials \
   fi
   sleep 5
 done
+
+if /opt/keycloak/bin/kcadm.sh get "realms/${KEYCLOAK_REALM}" >/dev/null 2>&1; then
+  echo "Realm ${KEYCLOAK_REALM} found."
+elif [ "${KEYCLOAK_CREATE_REALM_IF_MISSING}" = "true" ]; then
+  echo "Realm ${KEYCLOAK_REALM} not found. Creating it..."
+  /opt/keycloak/bin/kcadm.sh create realms \
+    -s "realm=${KEYCLOAK_REALM}" \
+    -s "enabled=true" >/dev/null
+else
+  echo "Realm ${KEYCLOAK_REALM} was not found and auto-creation is disabled." >&2
+  exit 1
+fi
 
 echo "Configuring SMTP settings for realm ${KEYCLOAK_REALM}..."
 /opt/keycloak/bin/kcadm.sh update "realms/${KEYCLOAK_REALM}" \
