@@ -36,7 +36,7 @@ services:
       KC_HTTP_ENABLED: ${KC_HTTP_ENABLED:-true}
       KC_HEALTH_ENABLED: ${KC_HEALTH_ENABLED:-true}
       KC_METRICS_ENABLED: ${KC_METRICS_ENABLED:-true}
-      KC_SMTP_HOST: ${KC_SMTP_HOST:-mail.zapcode.ch}
+      KC_SMTP_HOST: ${KC_SMTP_HOST:-mailserver}
       KC_SMTP_PORT: ${KC_SMTP_PORT:-587}
       KC_SMTP_FROM: ${KC_SMTP_FROM:-no-reply@zapcode.ch}
       KC_SMTP_FROM_DISPLAY_NAME: ${KC_SMTP_FROM_DISPLAY_NAME:-ZapAuth}

@@ -7,6 +7,7 @@ KEYCLOAK_REALM="${KEYCLOAK_REALM:-zapfood}"
 KEYCLOAK_CREATE_REALM_IF_MISSING="${KEYCLOAK_CREATE_REALM_IF_MISSING:-true}"
 BOOTSTRAP_ADMIN_USERNAME="${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}"
 BOOTSTRAP_ADMIN_PASSWORD="${KC_BOOTSTRAP_ADMIN_PASSWORD:-replace-me}"
+BOOTSTRAP_ADMIN_EMAIL="${KC_BOOTSTRAP_ADMIN_EMAIL:-admin@zapcode.ch}"
 
 echo "Waiting for Keycloak admin login at ${KEYCLOAK_URL}..."
 attempts=0
@@ -35,9 +36,28 @@ else
   exit 1
 fi
 
+ADMIN_USER_ID=$(
+  /opt/keycloak/bin/kcadm.sh get users \
+    -r master \
+    -q "username=${BOOTSTRAP_ADMIN_USERNAME}" \
+    | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+    | head -n 1
+)
+
+if [ -n "${ADMIN_USER_ID}" ]; then
+  echo "Setting email for bootstrap admin ${BOOTSTRAP_ADMIN_USERNAME}..."
+  /opt/keycloak/bin/kcadm.sh update "users/${ADMIN_USER_ID}" \
+    -r master \
+    -s "email=${BOOTSTRAP_ADMIN_EMAIL}" \
+    -s "emailVerified=true" >/dev/null
+else
+  echo "Bootstrap admin user ${BOOTSTRAP_ADMIN_USERNAME} was not found in realm master." >&2
+  exit 1
+fi
+
 echo "Configuring SMTP settings for realm ${KEYCLOAK_REALM}..."
 /opt/keycloak/bin/kcadm.sh update "realms/${KEYCLOAK_REALM}" \
-  -s "smtpServer.host=${KC_SMTP_HOST:-mail.zapcode.ch}" \
+  -s "smtpServer.host=${KC_SMTP_HOST:-mailserver}" \
   -s "smtpServer.port=${KC_SMTP_PORT:-587}" \
   -s "smtpServer.from=${KC_SMTP_FROM:-no-reply@zapcode.ch}" \
   -s "smtpServer.fromDisplayName=${KC_SMTP_FROM_DISPLAY_NAME:-ZapAuth}" \
