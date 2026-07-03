@@ -37,10 +37,14 @@ services:
       APP_BASE_URL: ${APP_BASE_URL:-https://zapcode.ch}
       AUTH_SESSION_SECRET: ${AUTH_SESSION_SECRET:-replace-me}
       HOST: 0.0.0.0
-      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-zapfood-web}
-      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
-      OIDC_INTERNAL_ISSUER: ${OIDC_INTERNAL_ISSUER:-http://keycloak:8080/realms/zapfood}
-      OIDC_ISSUER: ${OIDC_ISSUER:-https://auth.zapcode.ch/realms/zapfood}
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID:-zapfood-web}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-}
+      KEYCLOAK_INTERNAL_ISSUER: ${KEYCLOAK_INTERNAL_ISSUER:-http://keycloak:8080/realms/zapfood}
+      KEYCLOAK_ISSUER: ${KEYCLOAK_ISSUER:-https://auth.zapcode.ch/realms/zapfood}
+      OIDC_CLIENT_ID: ${OIDC_CLIENT_ID:-${KEYCLOAK_CLIENT_ID:-zapfood-web}}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-${KEYCLOAK_CLIENT_SECRET:-}}
+      OIDC_INTERNAL_ISSUER: ${OIDC_INTERNAL_ISSUER:-${KEYCLOAK_INTERNAL_ISSUER:-http://keycloak:8080/realms/zapfood}}
+      OIDC_ISSUER: ${OIDC_ISSUER:-${KEYCLOAK_ISSUER:-https://auth.zapcode.ch/realms/zapfood}}
       OIDC_REGISTRATION_URL: ${OIDC_REGISTRATION_URL:-}
       PORT: 3000
       NODE_ENV: production
