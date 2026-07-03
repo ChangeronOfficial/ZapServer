@@ -15,6 +15,7 @@ Set the following values in [`.env`](/workspaces/ZapServer/ZapAuth/.env:1):
 - `KEYCLOAK_CLIENT_ROOT_URL`: application base URL used for Keycloak client metadata
 - `KEYCLOAK_CLIENT_REDIRECT_URIS`: JSON array of allowed redirect URIs
 - `KEYCLOAK_CLIENT_WEB_ORIGINS`: JSON array of allowed web origins
+- `KEYCLOAK_REGISTRATION_ALLOWED`: enable self-service user registration, default `true`
 - `KC_BOOTSTRAP_ADMIN_EMAIL`: email address assigned to the bootstrap admin user, default `admin@zapcode.ch`
 - `KC_SMTP_HOST`: SMTP host, default `mail.zapcode.ch`
 - `KC_SMTP_PORT`: SMTP port, default `587`
@@ -28,9 +29,9 @@ Set the following values in [`.env`](/workspaces/ZapServer/ZapAuth/.env:1):
 - `KC_SMTP_PASSWORD`: SMTP password
 
 The `configure-realm-email` service uses `kcadm.sh` to write these settings into the target
-Keycloak realm. It also ensures the configured OIDC client exists. This is required because
-Keycloak stores realm and client settings internally instead of reading them directly from
-generic server environment variables.
+Keycloak realm. It also ensures the configured OIDC client exists and explicitly sets whether
+self-service registration is enabled. This is required because Keycloak stores realm and client
+settings internally instead of reading them directly from generic server environment variables.
 
 ## Mailserver prerequisites
 

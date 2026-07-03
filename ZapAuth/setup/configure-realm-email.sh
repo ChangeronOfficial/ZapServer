@@ -13,6 +13,7 @@ KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
 KEYCLOAK_CLIENT_ROOT_URL="${KEYCLOAK_CLIENT_ROOT_URL:-https://zapcode.ch}"
 KEYCLOAK_CLIENT_REDIRECT_URIS="${KEYCLOAK_CLIENT_REDIRECT_URIS:-[\"https://zapcode.ch/*\"]}"
 KEYCLOAK_CLIENT_WEB_ORIGINS="${KEYCLOAK_CLIENT_WEB_ORIGINS:-[\"https://zapcode.ch\"]}"
+KEYCLOAK_REGISTRATION_ALLOWED="${KEYCLOAK_REGISTRATION_ALLOWED:-true}"
 
 echo "Waiting for Keycloak admin login at ${KEYCLOAK_URL}..."
 attempts=0
@@ -60,8 +61,9 @@ else
   exit 1
 fi
 
-echo "Configuring SMTP settings for realm ${KEYCLOAK_REALM}..."
+echo "Configuring realm settings for ${KEYCLOAK_REALM}..."
 /opt/keycloak/bin/kcadm.sh update "realms/${KEYCLOAK_REALM}" \
+  -s "registrationAllowed=${KEYCLOAK_REGISTRATION_ALLOWED}" \
   -s "smtpServer.host=${KC_SMTP_HOST:-mail.zapcode.ch}" \
   -s "smtpServer.port=${KC_SMTP_PORT:-587}" \
   -s "smtpServer.from=${KC_SMTP_FROM:-no-reply@zapcode.ch}" \
@@ -73,7 +75,7 @@ echo "Configuring SMTP settings for realm ${KEYCLOAK_REALM}..."
   -s "smtpServer.user=${KC_SMTP_USER:-no-reply@zapcode.ch}" \
   -s "smtpServer.password=${KC_SMTP_PASSWORD:-replace-me}"
 
-echo "SMTP settings applied to realm ${KEYCLOAK_REALM}."
+echo "Realm settings applied to ${KEYCLOAK_REALM}."
 
 CLIENT_ID=$(
   /opt/keycloak/bin/kcadm.sh get clients \
