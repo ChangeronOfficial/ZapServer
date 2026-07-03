@@ -8,6 +8,11 @@ KEYCLOAK_CREATE_REALM_IF_MISSING="${KEYCLOAK_CREATE_REALM_IF_MISSING:-true}"
 BOOTSTRAP_ADMIN_USERNAME="${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}"
 BOOTSTRAP_ADMIN_PASSWORD="${KC_BOOTSTRAP_ADMIN_PASSWORD:-replace-me}"
 BOOTSTRAP_ADMIN_EMAIL="${KC_BOOTSTRAP_ADMIN_EMAIL:-admin@zapcode.ch}"
+KEYCLOAK_CLIENT_ID="${KEYCLOAK_CLIENT_ID:-zapfood-web}"
+KEYCLOAK_CLIENT_SECRET="${KEYCLOAK_CLIENT_SECRET:-}"
+KEYCLOAK_CLIENT_ROOT_URL="${KEYCLOAK_CLIENT_ROOT_URL:-https://zapcode.ch}"
+KEYCLOAK_CLIENT_REDIRECT_URIS="${KEYCLOAK_CLIENT_REDIRECT_URIS:-[\"https://zapcode.ch/*\"]}"
+KEYCLOAK_CLIENT_WEB_ORIGINS="${KEYCLOAK_CLIENT_WEB_ORIGINS:-[\"https://zapcode.ch\"]}"
 
 echo "Waiting for Keycloak admin login at ${KEYCLOAK_URL}..."
 attempts=0
@@ -69,3 +74,51 @@ echo "Configuring SMTP settings for realm ${KEYCLOAK_REALM}..."
   -s "smtpServer.password=${KC_SMTP_PASSWORD:-replace-me}"
 
 echo "SMTP settings applied to realm ${KEYCLOAK_REALM}."
+
+CLIENT_ID=$(
+  /opt/keycloak/bin/kcadm.sh get clients \
+    -r "${KEYCLOAK_REALM}" \
+    -q "clientId=${KEYCLOAK_CLIENT_ID}" \
+    | sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' \
+    | head -n 1
+)
+
+if [ -n "${CLIENT_ID}" ]; then
+  echo "Client ${KEYCLOAK_CLIENT_ID} found. Updating configuration..."
+  /opt/keycloak/bin/kcadm.sh update "clients/${CLIENT_ID}" \
+    -r "${KEYCLOAK_REALM}" \
+    -s "clientId=${KEYCLOAK_CLIENT_ID}" \
+    -s "name=${KEYCLOAK_CLIENT_ID}" \
+    -s "enabled=true" \
+    -s "protocol=openid-connect" \
+    -s "publicClient=false" \
+    -s "secret=${KEYCLOAK_CLIENT_SECRET}" \
+    -s "standardFlowEnabled=true" \
+    -s "directAccessGrantsEnabled=false" \
+    -s "serviceAccountsEnabled=false" \
+    -s "frontchannelLogout=true" \
+    -s "rootUrl=${KEYCLOAK_CLIENT_ROOT_URL}" \
+    -s "baseUrl=${KEYCLOAK_CLIENT_ROOT_URL}" \
+    -s "redirectUris=${KEYCLOAK_CLIENT_REDIRECT_URIS}" \
+    -s "webOrigins=${KEYCLOAK_CLIENT_WEB_ORIGINS}" >/dev/null
+else
+  echo "Client ${KEYCLOAK_CLIENT_ID} not found. Creating it..."
+  /opt/keycloak/bin/kcadm.sh create clients \
+    -r "${KEYCLOAK_REALM}" \
+    -s "clientId=${KEYCLOAK_CLIENT_ID}" \
+    -s "name=${KEYCLOAK_CLIENT_ID}" \
+    -s "enabled=true" \
+    -s "protocol=openid-connect" \
+    -s "publicClient=false" \
+    -s "secret=${KEYCLOAK_CLIENT_SECRET}" \
+    -s "standardFlowEnabled=true" \
+    -s "directAccessGrantsEnabled=false" \
+    -s "serviceAccountsEnabled=false" \
+    -s "frontchannelLogout=true" \
+    -s "rootUrl=${KEYCLOAK_CLIENT_ROOT_URL}" \
+    -s "baseUrl=${KEYCLOAK_CLIENT_ROOT_URL}" \
+    -s "redirectUris=${KEYCLOAK_CLIENT_REDIRECT_URIS}" \
+    -s "webOrigins=${KEYCLOAK_CLIENT_WEB_ORIGINS}" >/dev/null
+fi
+
+echo "OIDC client ${KEYCLOAK_CLIENT_ID} is configured in realm ${KEYCLOAK_REALM}."
