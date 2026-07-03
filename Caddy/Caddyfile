@@ -5,3 +5,7 @@ zapcode.ch, www.zapcode.ch {
 auth.zapcode.ch {
 	reverse_proxy zapauth-keycloak:8080
 }
+
+mail.zapcode.ch {
+	respond "mail endpoint" 200
+}

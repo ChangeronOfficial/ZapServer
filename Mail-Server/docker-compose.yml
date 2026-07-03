@@ -18,6 +18,7 @@ services:
       - mail_state:/var/mail-state
       - mail_logs:/var/log/mail
       - ./docker-data/dms/config/:/tmp/docker-mailserver/
+      - caddy_data:/caddy-data:ro
       - /etc/localtime:/etc/localtime:ro
     cap_add:
       - NET_ADMIN
@@ -39,6 +40,9 @@ volumes:
   mail_data:
   mail_state:
   mail_logs:
+  caddy_data:
+    external: true
+    name: caddy_caddy_data
 
 networks:
   proxy:

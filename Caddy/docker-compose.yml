@@ -15,7 +15,9 @@ services:
 
 volumes:
   caddy_data:
+    name: caddy_caddy_data
   caddy_config:
+    name: caddy_caddy_config
 
 networks:
   proxy:
