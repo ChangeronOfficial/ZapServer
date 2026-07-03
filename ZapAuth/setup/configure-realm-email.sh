@@ -57,7 +57,7 @@ fi
 
 echo "Configuring SMTP settings for realm ${KEYCLOAK_REALM}..."
 /opt/keycloak/bin/kcadm.sh update "realms/${KEYCLOAK_REALM}" \
-  -s "smtpServer.host=${KC_SMTP_HOST:-mailserver}" \
+  -s "smtpServer.host=${KC_SMTP_HOST:-mail.zapcode.ch}" \
   -s "smtpServer.port=${KC_SMTP_PORT:-587}" \
   -s "smtpServer.from=${KC_SMTP_FROM:-no-reply@zapcode.ch}" \
   -s "smtpServer.fromDisplayName=${KC_SMTP_FROM_DISPLAY_NAME:-ZapAuth}" \

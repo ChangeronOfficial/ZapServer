@@ -1,8 +1,8 @@
 # ZapAuth
 
 `ZapAuth` uses Keycloak behind `auth.zapcode.ch`. Outgoing emails such as password resets,
-verification emails, and admin notifications are sent through the SMTP server container
-`mailserver` on the internal Docker network.
+verification emails, and admin notifications are sent through the SMTP server for
+`mail.zapcode.ch` on the shared Docker network.
 
 ## SMTP configuration
 
@@ -11,7 +11,7 @@ Set the following values in [`.env`](/workspaces/ZapServer/ZapAuth/.env:1):
 - `KEYCLOAK_REALM`: realm whose email settings should be updated, default `zapfood`
 - `KEYCLOAK_CREATE_REALM_IF_MISSING`: create the realm automatically if it does not exist, default `true`
 - `KC_BOOTSTRAP_ADMIN_EMAIL`: email address assigned to the bootstrap admin user, default `admin@zapcode.ch`
-- `KC_SMTP_HOST`: SMTP host, default `mailserver`
+- `KC_SMTP_HOST`: SMTP host, default `mail.zapcode.ch`
 - `KC_SMTP_PORT`: SMTP port, default `587`
 - `KC_SMTP_FROM`: envelope/header sender, default `no-reply@zapcode.ch`
 - `KC_SMTP_FROM_DISPLAY_NAME`: display name, default `ZapAuth`
@@ -32,8 +32,12 @@ Before deploying `ZapAuth`, create a dedicated SMTP account on the mailserver:
 
 - Recommended account: `no-reply@zapcode.ch`
 - SMTP transport: port `587` with `STARTTLS`
-- Internal Docker hostname: `mailserver`
-- Public hostname: `mail.zapcode.ch`
+- SMTP hostname for clients: `mail.zapcode.ch`
+- Internal Docker alias also available: `mailserver`
+
+Use `mail.zapcode.ch` for `KC_SMTP_HOST` so Keycloak validates the certificate against the
+hostname present in the mailserver TLS certificate. Using the Docker alias `mailserver` with
+STARTTLS causes certificate hostname verification to fail.
 
 Keep the mailbox dedicated to application email. Do not use it as the human admin mailbox.
 

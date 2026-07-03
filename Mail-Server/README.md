@@ -37,4 +37,6 @@ Use the same mailbox and password in [ZapAuth](../ZapAuth/README.md) as `KC_SMTP
 The mailserver publishes the aliases `mailserver`, `mail`, and `mail.zapcode.ch` on the shared
 Docker network `zapserver_proxy`.
 
-This allows other stacks such as `ZapAuth` to reach SMTP internally via `mailserver:587`.
+This allows other stacks such as `ZapAuth` to reach SMTP internally, but TLS-aware SMTP clients
+should connect with host `mail.zapcode.ch:587` so certificate hostname verification matches the
+issued certificate.
