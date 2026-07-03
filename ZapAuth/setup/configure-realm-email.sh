@@ -14,6 +14,7 @@ KEYCLOAK_CLIENT_ROOT_URL="${KEYCLOAK_CLIENT_ROOT_URL:-https://zapcode.ch}"
 KEYCLOAK_CLIENT_REDIRECT_URIS="${KEYCLOAK_CLIENT_REDIRECT_URIS:-[\"https://zapcode.ch/*\"]}"
 KEYCLOAK_CLIENT_WEB_ORIGINS="${KEYCLOAK_CLIENT_WEB_ORIGINS:-[\"https://zapcode.ch\"]}"
 KEYCLOAK_REGISTRATION_ALLOWED="${KEYCLOAK_REGISTRATION_ALLOWED:-true}"
+KEYCLOAK_SSL_REQUIRED="${KEYCLOAK_SSL_REQUIRED:-none}"
 
 echo "Waiting for Keycloak admin login at ${KEYCLOAK_URL}..."
 attempts=0
@@ -64,6 +65,7 @@ fi
 echo "Configuring realm settings for ${KEYCLOAK_REALM}..."
 /opt/keycloak/bin/kcadm.sh update "realms/${KEYCLOAK_REALM}" \
   -s "registrationAllowed=${KEYCLOAK_REGISTRATION_ALLOWED}" \
+  -s "sslRequired=${KEYCLOAK_SSL_REQUIRED}" \
   -s "smtpServer.host=${KC_SMTP_HOST:-mail.zapcode.ch}" \
   -s "smtpServer.port=${KC_SMTP_PORT:-587}" \
   -s "smtpServer.from=${KC_SMTP_FROM:-no-reply@zapcode.ch}" \

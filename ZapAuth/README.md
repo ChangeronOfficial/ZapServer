@@ -16,6 +16,7 @@ Set the following values in [`.env`](/workspaces/ZapServer/ZapAuth/.env:1):
 - `KEYCLOAK_CLIENT_REDIRECT_URIS`: JSON array of allowed redirect URIs
 - `KEYCLOAK_CLIENT_WEB_ORIGINS`: JSON array of allowed web origins
 - `KEYCLOAK_REGISTRATION_ALLOWED`: enable self-service user registration, default `true`
+- `KEYCLOAK_SSL_REQUIRED`: Keycloak realm SSL mode, set to `none` here because app-to-Keycloak traffic runs over the internal Docker network via `http://keycloak:8080`
 - `KC_BOOTSTRAP_ADMIN_EMAIL`: email address assigned to the bootstrap admin user, default `admin@zapcode.ch`
 - `KC_SMTP_HOST`: SMTP host, default `mail.zapcode.ch`
 - `KC_SMTP_PORT`: SMTP port, default `587`
