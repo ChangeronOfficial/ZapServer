@@ -15,6 +15,15 @@ KEYCLOAK_CLIENT_REDIRECT_URIS="${KEYCLOAK_CLIENT_REDIRECT_URIS:-[\"https://zapco
 KEYCLOAK_CLIENT_WEB_ORIGINS="${KEYCLOAK_CLIENT_WEB_ORIGINS:-[\"https://zapcode.ch\"]}"
 KEYCLOAK_REGISTRATION_ALLOWED="${KEYCLOAK_REGISTRATION_ALLOWED:-true}"
 KEYCLOAK_SSL_REQUIRED="${KEYCLOAK_SSL_REQUIRED:-none}"
+KEYCLOAK_TOTP_ENABLED="${KEYCLOAK_TOTP_ENABLED:-false}"
+KEYCLOAK_TOTP_ENFORCE_FOR_USERS="${KEYCLOAK_TOTP_ENFORCE_FOR_USERS:-false}"
+KEYCLOAK_TOTP_ISSUER="${KEYCLOAK_TOTP_ISSUER:-ZapAuth}"
+KEYCLOAK_TOTP_TYPE="${KEYCLOAK_TOTP_TYPE:-totp}"
+KEYCLOAK_TOTP_ALGORITHM="${KEYCLOAK_TOTP_ALGORITHM:-HmacSHA1}"
+KEYCLOAK_TOTP_DIGITS="${KEYCLOAK_TOTP_DIGITS:-6}"
+KEYCLOAK_TOTP_PERIOD="${KEYCLOAK_TOTP_PERIOD:-30}"
+KEYCLOAK_TOTP_LOOK_AHEAD_WINDOW="${KEYCLOAK_TOTP_LOOK_AHEAD_WINDOW:-1}"
+KEYCLOAK_TOTP_REUSABLE_CODE="${KEYCLOAK_TOTP_REUSABLE_CODE:-false}"
 
 echo "Waiting for Keycloak admin login at ${KEYCLOAK_URL}..."
 attempts=0
@@ -78,6 +87,42 @@ echo "Configuring realm settings for ${KEYCLOAK_REALM}..."
   -s "smtpServer.password=${KC_SMTP_PASSWORD:-replace-me}"
 
 echo "Realm settings applied to ${KEYCLOAK_REALM}."
+
+if [ "${KEYCLOAK_TOTP_ENABLED}" = "true" ]; then
+  echo "Enabling TOTP policy for realm ${KEYCLOAK_REALM}..."
+  /opt/keycloak/bin/kcadm.sh update "realms/${KEYCLOAK_REALM}" \
+    -s "otpPolicyType=${KEYCLOAK_TOTP_TYPE}" \
+    -s "otpPolicyAlgorithm=${KEYCLOAK_TOTP_ALGORITHM}" \
+    -s "otpPolicyDigits=${KEYCLOAK_TOTP_DIGITS}" \
+    -s "otpPolicyPeriod=${KEYCLOAK_TOTP_PERIOD}" \
+    -s "otpPolicyLookAheadWindow=${KEYCLOAK_TOTP_LOOK_AHEAD_WINDOW}" \
+    -s "otpPolicyCodeReusable=${KEYCLOAK_TOTP_REUSABLE_CODE}" \
+    -s "otpPolicyIssuer=${KEYCLOAK_TOTP_ISSUER}" >/dev/null
+
+  REQUIRED_ACTION_DEFAULT="false"
+  if [ "${KEYCLOAK_TOTP_ENFORCE_FOR_USERS}" = "true" ]; then
+    REQUIRED_ACTION_DEFAULT="true"
+  fi
+
+  REQUIRED_ACTION_ALIAS=""
+  for alias in CONFIGURE_TOTP CONFIGURE_OTP; do
+    if /opt/keycloak/bin/kcadm.sh get "authentication/required-actions/${alias}" -r "${KEYCLOAK_REALM}" >/dev/null 2>&1; then
+      REQUIRED_ACTION_ALIAS="${alias}"
+      break
+    fi
+  done
+
+  if [ -n "${REQUIRED_ACTION_ALIAS}" ]; then
+    echo "Updating required action ${REQUIRED_ACTION_ALIAS}..."
+    /opt/keycloak/bin/kcadm.sh update "authentication/required-actions/${REQUIRED_ACTION_ALIAS}" \
+      -r "${KEYCLOAK_REALM}" \
+      -s "enabled=true" \
+      -s "defaultAction=${REQUIRED_ACTION_DEFAULT}" \
+      -s "priority=10" >/dev/null
+  else
+    echo "Warning: could not find Keycloak required action alias for TOTP configuration." >&2
+  fi
+fi
 
 CLIENT_ID=$(
   /opt/keycloak/bin/kcadm.sh get clients \

@@ -17,6 +17,15 @@ Set the following values in [`.env`](/workspaces/ZapServer/ZapAuth/.env:1):
 - `KEYCLOAK_CLIENT_WEB_ORIGINS`: JSON array of allowed web origins
 - `KEYCLOAK_REGISTRATION_ALLOWED`: enable self-service user registration, default `true`
 - `KEYCLOAK_SSL_REQUIRED`: Keycloak realm SSL mode, set to `none` here because app-to-Keycloak traffic runs over the internal Docker network via `http://keycloak:8080`
+- `KEYCLOAK_TOTP_ENABLED`: enable Authenticator-app-based 2FA policy in the realm, default `false`
+- `KEYCLOAK_TOTP_ENFORCE_FOR_USERS`: make Keycloak require TOTP setup as a default required action, default `false`
+- `KEYCLOAK_TOTP_ISSUER`: label shown in authenticator apps, default `ZapAuth`
+- `KEYCLOAK_TOTP_TYPE`: OTP type, default `totp`
+- `KEYCLOAK_TOTP_ALGORITHM`: hash algorithm, default `HmacSHA1`
+- `KEYCLOAK_TOTP_DIGITS`: number of digits, default `6`
+- `KEYCLOAK_TOTP_PERIOD`: validity period in seconds, default `30`
+- `KEYCLOAK_TOTP_LOOK_AHEAD_WINDOW`: accepted clock drift window, default `1`
+- `KEYCLOAK_TOTP_REUSABLE_CODE`: allow code reuse within the same period, default `false`
 - `KC_BOOTSTRAP_ADMIN_EMAIL`: email address assigned to the bootstrap admin user, default `admin@zapcode.ch`
 - `KC_SMTP_HOST`: SMTP host, default `mail.zapcode.ch`
 - `KC_SMTP_PORT`: SMTP port, default `587`
@@ -31,8 +40,30 @@ Set the following values in [`.env`](/workspaces/ZapServer/ZapAuth/.env:1):
 
 The `configure-realm-email` service uses `kcadm.sh` to write these settings into the target
 Keycloak realm. It also ensures the configured OIDC client exists and explicitly sets whether
-self-service registration is enabled. This is required because Keycloak stores realm and client
-settings internally instead of reading them directly from generic server environment variables.
+self-service registration is enabled. When TOTP is enabled, the same job also writes the realm's
+OTP policy and activates Keycloak's required action for authenticator-app setup. This is required
+because Keycloak stores realm and client settings internally instead of reading them directly from
+generic server environment variables.
+
+## Authenticator app 2FA
+
+To enable 2FA with apps such as Google Authenticator, Microsoft Authenticator, or FreeOTP, set:
+
+```env
+KEYCLOAK_TOTP_ENABLED=true
+KEYCLOAK_TOTP_ENFORCE_FOR_USERS=true
+KEYCLOAK_TOTP_ISSUER=ZapAuth
+```
+
+Behavior:
+
+- `KEYCLOAK_TOTP_ENABLED=true` enables the realm TOTP policy.
+- `KEYCLOAK_TOTP_ENFORCE_FOR_USERS=true` marks TOTP setup as a default required action in Keycloak.
+- Users will then be prompted to scan a QR code with an authenticator app during login if they
+  have not configured TOTP yet.
+
+If you only want to allow TOTP without forcing every user to set it up immediately, leave
+`KEYCLOAK_TOTP_ENFORCE_FOR_USERS=false`.
 
 ## Mailserver prerequisites
 
