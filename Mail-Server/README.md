@@ -35,6 +35,53 @@ The script is idempotent:
 
 Use the same mailbox and password in [ZapAuth](../ZapAuth/README.md) as `KC_SMTP_USER` and `KC_SMTP_PASSWORD`.
 
+## DNS records required for delivery
+
+The mailserver can accept SMTP locally as soon as Docker is running, but external providers such as
+Gmail will reject mail until `zapcode.ch` publishes aligned SPF, DKIM, and DMARC records.
+
+Recommended baseline records for this stack:
+
+```dns
+$TTL 3600
+@       IN MX 10 mail.zapcode.ch.
+@       IN TXT "v=spf1 mx a:mail.zapcode.ch ip4:144.2.118.54 ip6:2a02:21b4:a603:5a00:a2b5:49ff:fe3e:6000 ~all"
+mail    IN A 144.2.118.54
+mail    IN AAAA 2a02:21b4:a603:5a00:417d:8a06:dced:8ad
+_dmarc  IN TXT "v=DMARC1; p=quarantine; adkim=s; aspf=s; rua=mailto:dmarc@zapcode.ch"
+```
+
+Important details:
+
+- Do not keep SPF at `v=spf1 -all`. That explicitly says no host may send mail for `zapcode.ch`.
+- Publish the DKIM public key at `selector._domainkey.zapcode.ch`, not as a TXT record on `mail.zapcode.ch`.
+- The DKIM signing domain must be `d=zapcode.ch` so it aligns with `From: no-reply@zapcode.ch`.
+- Start DMARC with `p=quarantine` or `p=none` while testing. Switch to `p=reject` only after both SPF or DKIM pass reliably.
+
+Example DKIM record shape:
+
+```dns
+mail._domainkey IN TXT "v=DKIM1; k=rsa; p=REPLACE_WITH_YOUR_PUBLIC_KEY"
+```
+
+The selector in this example is `mail`, so the resulting DNS name is
+`mail._domainkey.zapcode.ch`. If you generate a different selector, publish that exact hostname
+instead.
+
+## Delivery checklist
+
+Use this short checklist before testing password reset or verification emails:
+
+1. `mail.zapcode.ch` resolves publicly to the same IPv4/IPv6 addresses the server uses to send mail.
+2. Reverse DNS for the sending IP points back to `mail.zapcode.ch`.
+3. SPF authorizes this host to send for `zapcode.ch`.
+4. OpenDKIM signs outbound mail with `d=zapcode.ch`.
+5. The DKIM public key is published at `selector._domainkey.zapcode.ch`.
+6. DMARC policy is relaxed during rollout and tightened only after successful verification.
+
+If Gmail returns `550 5.7.26 Unauthenticated email ... due to domain's DMARC policy`, one of the
+aligned SPF or DKIM checks is still failing.
+
 ## Networking
 
 The mailserver publishes the aliases `mailserver`, `mail`, and `mail.zapcode.ch` on the shared

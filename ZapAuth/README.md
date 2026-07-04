@@ -69,4 +69,7 @@ Then verify in Keycloak:
 
 - Rotate `KC_BOOTSTRAP_ADMIN_PASSWORD` and `KC_SMTP_PASSWORD` before production use.
 - Ensure SPF, DKIM, and DMARC are configured for `zapcode.ch` so Keycloak emails are delivered.
+- `KC_SMTP_FROM` must stay aligned with the authenticated domain, for example `no-reply@zapcode.ch`.
+- If Gmail rejects mail with `550 5.7.26`, check the DNS checklist in [Mail-Server/README.md](../Mail-Server/README.md):
+  SPF must not be `-all`, and DKIM must be published as `selector._domainkey.zapcode.ch`.
 - This setup is for outbound email only; the mailserver is not used as a user authentication backend.
