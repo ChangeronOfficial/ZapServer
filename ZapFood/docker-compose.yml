@@ -15,7 +15,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
 
   prisma-setup:
-    image: server:5000/zapfood-prisma:latest
+    image: ${ZAPFOOD_PRISMA_IMAGE:-server:5000/zapfood-prisma:${ZAPFOOD_IMAGE_TAG:-latest}}
     depends_on:
       db:
         condition: service_healthy
@@ -25,7 +25,7 @@ services:
     restart: "no"
 
   app:
-    image: server:5000/zapfood:latest
+    image: ${ZAPFOOD_APP_IMAGE:-server:5000/zapfood:${ZAPFOOD_IMAGE_TAG:-latest}}
     container_name: zapfood-app
     depends_on:
       db:

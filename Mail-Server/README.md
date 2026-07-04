@@ -12,6 +12,9 @@ Set the following values in [`.env`](/workspaces/ZapServer/Mail-Server/.env:1):
 - `SSL_CERT_PATH`: full path to the public certificate inside the mounted Caddy data volume
 - `SSL_KEY_PATH`: full path to the matching private key inside the mounted Caddy data volume
 
+This setup keeps DKIM handling on `OpenDKIM`. Leave `ENABLE_RSPAMD=0` to avoid running Rspamd
+and OpenDKIM in parallel for DKIM-related functionality.
+
 Start Caddy first so it can issue the certificate for `mail.zapcode.ch`, then start the mailserver and create or update the mailbox:
 
 ```bash
