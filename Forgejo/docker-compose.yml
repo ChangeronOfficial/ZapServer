@@ -1,0 +1,68 @@
+services:
+  db:
+    image: ${FORGEJO_POSTGRES_IMAGE:-postgres:17-alpine}
+    container_name: forgejo-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${FORGEJO_DB_NAME:-forgejo}
+      POSTGRES_USER: ${FORGEJO_DB_USER:-forgejo}
+      POSTGRES_PASSWORD: ${FORGEJO_DB_PASSWORD:?Set FORGEJO_DB_PASSWORD in Forgejo/.env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+
+  forgejo:
+    image: ${FORGEJO_IMAGE:-codeberg.org/forgejo/forgejo:16}
+    container_name: forgejo
+    restart: unless-stopped
+    environment:
+      USER_UID: ${FORGEJO_UID:-1000}
+      USER_GID: ${FORGEJO_GID:-1000}
+
+      FORGEJO____APP_NAME: ${FORGEJO_APP_NAME:-ZapCode Forgejo}
+      FORGEJO__database__DB_TYPE: postgres
+      FORGEJO__database__HOST: db:5432
+      FORGEJO__database__NAME: ${FORGEJO_DB_NAME:-forgejo}
+      FORGEJO__database__USER: ${FORGEJO_DB_USER:-forgejo}
+      FORGEJO__database__PASSWD: ${FORGEJO_DB_PASSWORD:?Set FORGEJO_DB_PASSWORD in Forgejo/.env}
+
+      FORGEJO__server__DOMAIN: ${FORGEJO_DOMAIN:-server}
+      FORGEJO__server__SSH_DOMAIN: ${FORGEJO_DOMAIN:-server}
+      FORGEJO__server__ROOT_URL: http://${FORGEJO_DOMAIN:-server}:${FORGEJO_HTTP_PORT:-3000}/
+      FORGEJO__server__HTTP_PORT: 3000
+      FORGEJO__server__SSH_PORT: ${FORGEJO_SSH_PORT:-2222}
+      FORGEJO__server__LFS_START_SERVER: "true"
+      FORGEJO__server__OFFLINE_MODE: "true"
+
+      FORGEJO__security__INSTALL_LOCK: "true"
+      FORGEJO__service__DISABLE_REGISTRATION: ${FORGEJO_DISABLE_REGISTRATION:-true}
+      FORGEJO__service__REQUIRE_SIGNIN_VIEW: "false"
+      FORGEJO__service__ENABLE_NOTIFY_MAIL: ${FORGEJO_MAILER_ENABLED:-false}
+
+      FORGEJO__mailer__ENABLED: ${FORGEJO_MAILER_ENABLED:-false}
+      FORGEJO__mailer__PROTOCOL: smtp+starttls
+      FORGEJO__mailer__SMTP_ADDR: ${FORGEJO_MAILER_HOST:-mail.zapcode.ch}
+      FORGEJO__mailer__SMTP_PORT: ${FORGEJO_MAILER_PORT:-587}
+      FORGEJO__mailer__USER: ${FORGEJO_MAILER_USER:-no-reply@zapcode.ch}
+      FORGEJO__mailer__PASSWD: ${FORGEJO_MAILER_PASSWORD:-}
+      FORGEJO__mailer__FROM: ${FORGEJO_MAILER_FROM:-Forgejo <no-reply@zapcode.ch>}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${FORGEJO_HTTP_BIND_ADDRESS:-0.0.0.0}:${FORGEJO_HTTP_PORT:-3000}:3000"
+      - "${FORGEJO_SSH_BIND_ADDRESS:-0.0.0.0}:${FORGEJO_SSH_PORT:-2222}:22"
+    volumes:
+      - forgejo_data:/data
+    networks:
+      - default
+
+volumes:
+  forgejo_data:
+  postgres_data:
